@@ -9,7 +9,6 @@ services:
     restart: unless-stopped
     networks:
       - huly_net
-      - apps_apps
 
   cockroach:
     image: cockroachdb/cockroach:latest-v24.2
@@ -278,5 +277,3 @@ volumes:
 
 networks:
   huly_net:
-  apps_apps:
-    external: true

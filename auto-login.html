@@ -1,0 +1,43 @@
+<script>
+(function() {
+  // Auto-login for projects.stproperties.com
+  // If we are on the login page and not already authenticated, auto-login
+  if (window.location.href.includes("login")) {
+    fetch("/_accounts", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({method:"login",params:{email:"svet@stproperties.com",password:"Partycard123*"}})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.result && data.result.token) {
+        // Store everything Huly needs
+        for (let key in localStorage) {
+          // Clear old auth data
+          if (key.includes("token") || key.includes("Token") || key.includes("account") || key.includes("Account")) {
+            localStorage.removeItem(key);
+          }
+        }
+        // Now select the workspace
+        fetch("/_accounts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + data.result.token
+          },
+          body: JSON.stringify({method:"selectWorkspace",params:{workspaceUrl:"stproperties"}})
+        })
+        .then(r => r.json())
+        .then(ws => {
+          if (ws.result && ws.result.token) {
+            document.cookie = "hc_last_token=" + ws.result.token + ";path=/;max-age=31536000";
+            // Reload to let the app pick up the cookie
+            window.location.href = "/workbench/stproperties";
+          }
+        });
+      }
+    })
+    .catch(e => console.error("Auto-login failed:", e));
+  }
+})();
+</script>
